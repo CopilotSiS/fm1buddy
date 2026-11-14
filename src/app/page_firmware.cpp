@@ -355,9 +355,9 @@ static void showCounts() {
 static void fillList() {
   const Theme& t = theme();
   listChanges = FwList::changes;
-  lv_obj_clean(list);
-  nSlots = 0;
+  nSlots = 0;  // (first: cleaning scrolls it to the top, and place() mustn't touch the rows going away)
   spacer = 0;
+  lv_obj_clean(list);
   rows = shown();
   if (rows.empty()) {
     lv_obj_t* l = label(list, "", &lv_font_montserrat_14, t.dim);
