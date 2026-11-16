@@ -1,0 +1,11 @@
+{
+  "name": "fm1core",
+  "version": "0.1.0",
+  "description": "fm1buddy's core, without a screen: the FM-1's update protocol, boot loader, backups, Hub, SLOOP, sounds, MIDI. A board gives it hal.h",
+  "license": "GPL-3.0-only",
+  "repository": { "type": "git", "url": "https://github.com/konsumer/fm1buddy.git" },
+  "frameworks": "*",
+  "platforms": "*",
+  "dependencies": [{ "owner": "bblanchon", "name": "ArduinoJson", "version": "7.2.1" }],
+  "build": { "srcDir": "src", "includeDir": "src" }
+}

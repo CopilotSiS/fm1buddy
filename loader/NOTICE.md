@@ -2,7 +2,7 @@
 
 fm1buddy's and lilfm1buddy's flash loader: it runs in the FM-1's RAM where the chip's boot ROM hands over its USB
 storage commands, the same place, and the same commands, as JieLi's `wl82loader.bin`. The board sends it there, runs it,
-and writes or reads the flash through it (fm1buddy's `src/app/uboot.cpp`, lilfm1buddy's `esp32/rom.cpp`: it builds it
+and writes or reads the flash through it (fm1buddy's `lib/fm1core/src/uboot.cpp`, lilfm1buddy's `esp32/rom.cpp`: it builds it
 from here, its `third_party/fm1buddy`).
 
 It's [m-bootloader](https://github.com/jvitkauskas/m-bootloader)'s flash loader (MIT), from commit
@@ -21,7 +21,7 @@ What lilfm1buddy and fm1buddy add:
   answer goes out first; the host may not see it.
 - `FC49` (fm1buddy's): the screen's colours, its theme's: from an index in the command (0 the background, 1 to 7 a map
   state's), up to 6 big-endian RGB565 colours. Until it's sent, the colours above. fm1buddy's map states are its own
-  (`src/app/jobs.cpp`, `FmState`), drawn in the colours it sends.
+  (`lib/fm1core/src/jobs.cpp`, `FmState`), drawn in the colours it sends.
 - A `%` in the font.
 
 `test.sh` builds `loader.c` and `core.c` for this computer and checks those commands, the screen's rows, and what the
@@ -30,10 +30,10 @@ board asks of it (`test.c`): `CC=clang loader/test.sh`.
 Build it (the toolchain is [pi32v2-llvm](https://github.com/jvitkauskas/pi32v2-llvm), `pi32v2-23.1.5-2`, not JieLi's):
 
 ```sh
-PI32V2_TOOLCHAIN=~/pi32v2-llvm loader/build.sh   # build/mflr-loader.bin, and src/app/mflr_loader.h (in the board's program)
+PI32V2_TOOLCHAIN=~/pi32v2-llvm loader/build.sh   # build/mflr-loader.bin, and lib/fm1core/src/mflr_loader.h (in the board's program)
 ```
 
-`src/app/mflr_loader.h` is the same bytes, in the board's program: commit it with the sources. Its build isn't the
+`lib/fm1core/src/mflr_loader.h` is the same bytes, in the board's program: commit it with the sources. Its build isn't the
 same on every host (a few bytes of padding: 6312 on macOS arm64, 6316 on Linux x64, both fine), so CI builds the
 loader but doesn't compare the header byte for byte: run `loader/build.sh` and commit the header after changing
 anything here.

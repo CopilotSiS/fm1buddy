@@ -18,7 +18,7 @@ jobs:
           python-version: '3.12'
       - run: pip install platformio esptool==4.8.1
       - run: tools/unit-test.sh
-      # the FM-1's flash loader (loader/): its tests, and that it builds (its bytes are in src/app/mflr_loader.h; a
+      # the FM-1's flash loader (loader/): its tests, and that it builds (its bytes are in lib/fm1core/src/mflr_loader.h; a
       # build differs by a few bytes of padding from host to host, so they aren't compared)
       - run: loader/test.sh
       - uses: actions/cache@v4
@@ -31,7 +31,7 @@ jobs:
             curl -fL --retry 3 -o /tmp/pi32v2.tar.xz https://github.com/jvitkauskas/pi32v2-llvm/releases/download/pi32v2-23.1.5-2/pi32v2-llvm-23.1.5-2-linux-x64.tar.xz
             mkdir -p ~/pi32v2 && tar -xJf /tmp/pi32v2.tar.xz -C ~/pi32v2 --strip-components=1
           fi
-      - run: cp src/app/mflr_loader.h /tmp/ && PI32V2_TOOLCHAIN=~/pi32v2 loader/build.sh && cp /tmp/mflr_loader.h src/app/
+      - run: cp lib/fm1core/src/mflr_loader.h /tmp/ && PI32V2_TOOLCHAIN=~/pi32v2 loader/build.sh && cp /tmp/mflr_loader.h lib/fm1core/src/
       # PlatformIO's platforms and toolchains (GitHub release downloads): kept, so a slow GitHub doesn't fail the build
       - uses: actions/cache@v4
         with:

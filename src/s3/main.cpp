@@ -1,4 +1,4 @@
-// fm1buddy on the CYD-S3 (Freenove ESP32-S3 2.8", FNK0104B; 4", FNK0104S; 3.5", FNK0104N): the app (src/app), its
+// fm1buddy on the CYD-S3 (Freenove ESP32-S3 2.8", FNK0104B; 4", FNK0104S; 3.5", FNK0104N): the app (src/app, lib/fm1core), its
 // screen and touch panel (display.h, touch.h: the 2.8" and the 4" share their pins, the 3.5" has its own, and a QSPI
 // panel), and the hardware the app needs: the USB host, the SD card, Wi-Fi, Bluetooth (src/s3)
 #include <Arduino.h>
