@@ -1,4 +1,4 @@
-// The MIDI map tab: builds midimap.txt for the SD card. Rules read and write the same way as src/app/midimap.cpp
+// The MIDI map tab: builds midimap.txt for the SD card. Rules read and write the same way as lib/fm1core/src/midimap.cpp
 // (parse and text there), so what this makes is what the board reads. Devices come from Web MIDI: each one's short
 // name is the part of its name a rule uses ("from nanokontrol2"), and moving a control while learning makes a rule.
 

@@ -98,15 +98,16 @@ where its SD card is mounted; `eject` ejects it, and it comes back as the serial
 packages to it.
 
 ```
-src/app/   the app (LVGL 9): pages, the Hub's list, MIDI between devices, the FM-1's update protocol, sounds (SysEx),
-           setups and fomajam's kits and MIDI files (sounds, kits, songmidi), backups (uboot);
-           hal.h is what it needs from the board
+lib/fm1core/  the core, with no screen: the Hub's list, MIDI between devices, the FM-1's update protocol, sounds
+              (SysEx), setups and fomajam's kits and MIDI files (sounds, kits, songmidi), backups (uboot); hal.h is
+              what it needs from the board. A PlatformIO library, so other boards' apps (cardbuddy) can use it
+src/app/   the app (LVGL 9): its pages
 src/s3/    the board: screen, touch, SD, Wi-Fi, USB host (TinyUSB), Bluetooth MIDI (NimBLE)
 src/sim/   the simulator
 site/      the installer page (GitHub Pages, with the latest release)
 case/      the 3D-printed case (OpenSCAD); tools/cases.sh makes its STLs
 loader/    the flash loader that runs in the FM-1's RAM for backups and recovery, and draws on its screen
-           (m-bootloader's, MIT): loader/build.sh builds it into src/app/mflr_loader.h, loader/test.sh tests it
+           (m-bootloader's, MIT): loader/build.sh builds it into lib/fm1core/src/mflr_loader.h, loader/test.sh tests it
 ```
 
 ## License
