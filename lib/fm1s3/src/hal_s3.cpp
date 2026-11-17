@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -159,7 +160,7 @@ void hal::psramFirst(bool on) {
     return;  // (none: everything is in the internal RAM anyway)
   }
   psramOn = on;
-#ifdef CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL  // (a build without PSRAM: not there)
+#ifdef CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL                                       // (a build without PSRAM: not there)
   heap_caps_malloc_extmem_enable(on ? 0 : CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL);  // (as the Arduino core has it)
 #endif
 }
@@ -572,7 +573,11 @@ static int getWith(const char* url, const char* path, std::string* etag, void (*
   // write buffer (512) can't hold it, so following the redirect fails ("Out of buffer")
   c.buffer_size_tx = tx;
   c.user_agent = APP_NAME;
-  static char* buf = (char*)bigAlloc(4096);  // (made once, before TLS takes the room)
+  // the download's buffer: for this one only (kept, it was 4 KB of the internal RAM for good). Made before TLS takes
+  // the room
+  const int bufSize = lowMemory ? 2048 : 4096;
+  std::unique_ptr<char, decltype(&free)> keep((char*)bigAlloc(bufSize), free);
+  char* buf = keep.get();
   if (!buf) {
     err = "Not enough memory.";
     return -1;
@@ -615,7 +620,7 @@ static int getWith(const char* url, const char* path, std::string* etag, void (*
     uint32_t got = 0;
     bool ok = true;
     for (;;) {
-      int n = esp_http_client_read(h, buf, 4096);
+      int n = esp_http_client_read(h, buf, bufSize);
       if (n < 0) {
         err = "The download stopped part way.";
         ok = false;
@@ -750,7 +755,8 @@ const char* hal::selfUpdate(const char* path, void (*progress)(uint32_t, uint32_
     return to ? "It's too big for this board's app slot." : "This board has no second app slot.";
   }
   hal::log("update: %u bytes into %s (at %06X)", (unsigned)n, to->label, (unsigned)to->address);
-  static uint8_t* buf = (uint8_t*)bigAlloc(4096);
+  std::unique_ptr<uint8_t, decltype(&free)> keep((uint8_t*)bigAlloc(4096), free);  // (for this one only)
+  uint8_t* buf = keep.get();
   if (!buf) {
     fclose(f);
     return "Not enough memory.";
@@ -797,7 +803,8 @@ bool hal::sha256(const char* path, char hex[65]) {
   mbedtls_sha256_context ctx;
   mbedtls_sha256_init(&ctx);
   mbedtls_sha256_starts(&ctx, 0);
-  static uint8_t* buf = (uint8_t*)bigAlloc(4096);
+  std::unique_ptr<uint8_t, decltype(&free)> keep((uint8_t*)bigAlloc(4096), free);  // (for this one only)
+  uint8_t* buf = keep.get();
   if (!buf) {
     fclose(f);
     mbedtls_sha256_free(&ctx);
