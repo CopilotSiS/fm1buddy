@@ -31,3 +31,20 @@
 #define CFG_TUH_HID 0
 #undef CFG_TUH_MSC
 #define CFG_TUH_MSC 0
+
+// the device classes the framework turns on that nothing here uses (only MSC, the USB disk, and MIDI, to a computer):
+// their buffers are static, in the internal RAM, used or not (NCM's and audio's alone are 12 KB)
+#undef CFG_TUD_AUDIO
+#define CFG_TUD_AUDIO 0
+#undef CFG_TUD_NCM
+#define CFG_TUD_NCM 0
+#undef CFG_TUD_VIDEO
+#define CFG_TUD_VIDEO 0
+#undef CFG_TUD_VENDOR
+#define CFG_TUD_VENDOR 0
+#undef CFG_TUD_DFU
+#define CFG_TUD_DFU 0
+#undef CFG_TUD_DFU_RUNTIME
+#define CFG_TUD_DFU_RUNTIME 0
+#undef CFG_TUD_HID
+#define CFG_TUD_HID 0

@@ -16,6 +16,7 @@
 
 #include "flashbuf.h"
 #include "fm1.h"
+#include "memory.h"
 #include "midi.h"
 #include "settings.h"
 #include "sloop.h"
@@ -77,11 +78,16 @@ static bool start(Kind k, void (*fn)(void*)) {
   ok = false;
   error.clear();
   running = true;
-  hal::spawn(fn, 0);
+  // (the Hub's list and a download use ~4 KB of stack, TLS's handshake included: the rest, more. With no PSRAM
+  // every KB counts while Wi-Fi and TLS are up)
+  hal::spawn(fn, 0, lowMemory && (k == HUB || k == DOWNLOAD) ? 8192 : 16384);
   return true;
 }
 
 static void finish(bool good) {
+  if (lowMemory && (kind == HUB || kind == DOWNLOAD)) {
+    hal::wifiOff();  // (Wi-Fi kept on holds ~30 KB of the internal RAM: joining again takes a few seconds)
+  }
   hal::log("job: %s %s%s%s", NAMES[(int)kind], good ? "done" : "failed", good ? "" : ": ", good ? "" : error.c_str());
   ok = good;
   step = IDLE;
