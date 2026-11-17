@@ -42,7 +42,9 @@ eps = 0.01;
 // ---------------------------------------------------------------------------------------------- board ---
 // the CYD-S3, face up: x from its USB-C end, y from the long edge away from the SD card (the card goes in through the
 // other one). USB-C, BOOT, RESET, the SD socket and the RGB LED are on its back. Each value: the 2.8"'s, the 3.5"'s,
-// the 4"'s
+// the 4"'s. Face up with USB-C on the left, the SD card goes in at the far edge on the 2.8" and the 4", the near
+// one on the 3.5" (its back is laid out mirrored): S3_SD_NEAR puts the card's side (and what's measured from the
+// other) there
 function pick(a28, a35, a4) = board == "3.5" ? a35 : board == "4" ? a4 : a28;
 assert(board == "2.8" || board == "3.5" || board == "4", "board: \"2.8\", \"3.5\" or \"4\"");
 S3 = pick([86, 50], [101.5, 54.5], [112.21, 61.04]);
@@ -58,15 +60,25 @@ S3_GLASS = pick([8.4, 69.2], [9.25, 83], [8.82, 94.57]);     // the glass along 
 // at x 16.16; 4": 83.82 x 55.98 at x 17.07)
 S3_WIN = pick([[16.0, 2.6], [76.0, 47.4]], [[15.16, 1.67], [91.6, 52.83]], [[16.07, 1.93], [101.89, 59.11]]);
 S3_USB = [S3.y / 2, 3.2];                                    // its USB-C: y of the middle, height under the board
-S3_BTN = pick(                                               // BOOT, RESET
+S3_BTN_ = pick(                                               // BOOT, RESET
   [[3.26, 36.57], [3.26, 13.44]],
   [[3.26, 13.55], [3.26, 40.98]],
   [[4.05, 43.52], [4.05, 16.52]]);
+S3_BTN = [for (b = S3_BTN_) sy(b)];
 S3_SD = pick(50.97, 70.28, 83.26);                           // the card goes in through the y = S3.y edge, here
-S3_LED = pick([44.6, 17.6], [55, 6.5], [73.3, 31.4]);
+S3_LED_ = pick([44.6, 17.6], [55, 6.5], [73.3, 31.4]);
+S3_SD_NEAR = pick(false, true, false);
+function sy(p) = S3_SD_NEAR ? [p.x, S3.y - p.y] : p;         // y, from the edge away from the card, to the box's
+S3_LED = sy(S3_LED_);
 BAT_MAX = pick([72, 53], [88, 57], [98, 64]);                // the most room for a battery: between the posts, wall to wall
 
 // ------------------------------------------------------------------------------------------- shapes ---
+// the card's side: made at y = S3.y, mirrored across the board when it's the other one
+module sd_side() {
+  if (S3_SD_NEAR) translate([0, S3.y / 2, 0]) mirror([0, 1, 0]) translate([0, -S3.y / 2, 0]) children();
+  else children();
+}
+
 module rbox(p0, p1, r = 1.5) {
   s = p1 - p0;
   translate([p0.x + r, p0.y + r, p0.z]) linear_extrude(s.z) offset(r) square([s.x - 2 * r, s.y - 2 * r]);
@@ -150,10 +162,12 @@ module s3_base() {
     wall_hole(0, [sc0.x - wall / 2, S3_USB.x, usb_z], 13, 7.5);
     // the SD card, and a notch to push it in with a fingernail: below the slot, so its top stays one bridge (a notch
     // above it would leave the slot's top held at one end only)
-    wall_hole(1, [S3_SD, sc1.y + wall / 2, s_bz - 1.0], 16, 4);
-    translate([S3_SD, sc1.y - 1, s_bz - 1.0]) rotate([90, 0, 0]) mirror([0, 0, 1]) linear_extrude(wall + 2) intersection() {
-      circle(4.5);
-      translate([-5, -5]) square([10, 5 + 2]);  // (up to the slot's top)
+    sd_side() {
+      wall_hole(1, [S3_SD, sc1.y + wall / 2, s_bz - 1.0], 16, 4);
+      translate([S3_SD, sc1.y - 1, s_bz - 1.0]) rotate([90, 0, 0]) mirror([0, 0, 1]) linear_extrude(wall + 2) intersection() {
+        circle(4.5);
+        translate([-5, -5]) square([10, 5 + 2]);  // (up to the slot's top)
+      }
     }
     // BOOT and RESET, for a paperclip from underneath
     if (button_holes) for (b = S3_BTN) translate([b.x + 0.4, b.y, -floor_t - 1]) cylinder(d = 2.4, h = floor_t + 2);
@@ -179,7 +193,7 @@ module stand_in() {
   translate([0, 0, s_bz]) color("#222") cube([S3.x, S3.y, PCB]);
   translate([S3_GLASS[0], 0, s_bz + PCB]) color("#111") cube([S3_GLASS[1], S3.y, S3_FRONT - 0.2]);
   translate([-0.3, S3_USB.x - 4.5, s_bz - S3_USB.y]) color("#aaa") cube([7.3, 9, S3_USB.y]);
-  translate([S3_SD - 7, S3.y - 15, s_bz - 1.9]) color("#bbb") cube([14, 15, 1.9]);
+  sd_side() translate([S3_SD - 7, S3.y - 15, s_bz - 1.9]) color("#bbb") cube([14, 15, 1.9]);
   if (part != "view_board") battery_in();
 }
 
